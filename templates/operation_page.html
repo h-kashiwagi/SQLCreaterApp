@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!--接続情報-->
+<div style="display:flex;background-color: #E3E6E6;">
+  <div style="overflow: hidden;margin: 0 auto;min-width: 1800px;width: 100%;height: 95vh;">
+    <div id="left-area-parts">
+      <div style="min-width: 450px;">
+        <div id="con-area">
+          <div id="con-content">
+            <div><span class="item-theme">■DB接続情報</span>
+              <input type="button"  id="toggle-btn-con" autocomplete="off" value="▼">
+            </div>
+            <div id="con-field">
+              <div>
+                <label for="hostText">サーバー名</label>
+                <input class="con" name="host" id="hostText" placeholder="ここにテキストを入力" required/>
+              </div>
+              <div>
+                <label for="portText">ポート番号</label>
+                <input class="con" name="port" id="portText" placeholder="ここにテキストを入力" required/>
+              </div>
+              <div>
+                <label for="dbText">データベース名</label>
+                <input class="con" name="db" id="dbText" placeholder="ここにテキストを入力" required/>
+              </div>
+              <div>
+                <label for="userText">ユーザーID</label>
+                <input class="con" name="user" id="userText" placeholder="ここにテキストを入力" required/>
+              </div>
+              <div>
+                <label for="passwordText">パスワード</label>
+                <input class="con" name="password" id="passwordText" placeholder="ここにテキストを入力" required/>
+              </div>
+            </div>
+            <div style="text-align: right;margin-right: 20px;">
+              <button id="con-button" class="con-btn">DB接続</button>
+            </div>       
+          </div>
+          <!--スキーマ選択エリア-->
+          <div id="schema-content">
+            <div><span class="item-theme">■スキーマ選択</span></div>
+            <div id="schema-field">
+              <select id="schema-select" name="schemas">
+                <option class="front-title" value="null" disabled selected>選択して下さい</option>
+                <!--
+                {% if schema_items %}
+                  {% for item in schema_items %}
+                    <option value="{{ item.schema_name }}">{{ item.schema_name }}</option>
+                  {% endfor %}
+                {% endif %}
+                -->
+              </select>
+            </div>
+          </div>
+
+          <!--テーブル選択エリア-->
+          <div id="table-content">
+            <div><span class="item-theme">■テーブル選択</span></div>
+            <div id="table-field">
+              <ul id="table-add-list">
+                <li id="talbe-cdn-block-1" class="table-list">
+                  <div>
+                    <select id="table-select-1" class="tables" onchange="tbValChange(1)">
+                      <option class="front-title" value="null" selected>テーブル１</option>
+                    </select>
+                    <button id="add-table-btn">結合追加</button>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <input type="hidden"  value="" id="host">
+    <input type="hidden"  value="" id="port">
+    <input type="hidden"  value="" id="db">
+    <input type="hidden"  value="" id="user">
+    <input type="hidden"  value="" id="password">
+
+
+    <div id="right-area-parts">
+      <div id="column-area">
+        <div id="columns-contents-box">
+          <!--項目-->
+          <div id="column-content">
+            <div style="text-align: left;"><span class="item-theme">■項目選択</span></div>
+            <div style="max-width: 100%">
+
+              <div style="text-align: left;">
+                <label for="logical-name-cols" style="text-align: center;">論理名で表示</label><input type="checkbox" id="logical-name-cols" class="row-check-box"/>
+                <label for="item-type" style="text-align: center;">項目型を表示</label><input type="checkbox" id="item-type" class="row-check-box"/>
+                <button id="name-reset-btn" class="btn-default"><img src="./static/img/arrow-clockwise.svg" style="vertical-align: middle">別名リセット</button>
+              </div>
+
+              <div style="display: flex;">
+                <div id="before-list">
+                  <select id="collist1" size="15" name="num" multiple>
+                    <!--<option>項目を選択してください</option>-->
+                  </select>
+                </div>
+                <div id="item-btns-line">
+                  <button id="item-all-btn">ALL</button>
+                  <br>
+                  <label for="all-aster">「＊」で表示<br><input type="checkbox" id="all-aster" class="line-check-box"/></label>
+                  <br>
+                  <button id="item-add-btn">ADD</button>
+                  <br>
+                  <button id="item-remov-btn">REMOV</button>
+                </div>
+                <div id="setup-list">
+                  <select id="collist2" size="15" name="num" multiple>
+                    <!--<option>項目を追加してください</option>-->
+                  </select>
+                </div>
+                <div id="selected-right">
+                  <button type="button" class="btn-default btn-line-up" id="btnAvengerUp">
+                    <img src="{{ url_for('static', filename='img/caret-up-square.svg') }}" width="30px" height="40px">
+                  </button>
+                  <button type="button" class="btn-default btn-line-up" id="btnAvengerDown">
+                    <img src="{{ url_for('static', filename='img/caret-down-square.svg') }}" width="30px" height="40px">
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!--条件-->
+        <div id="cdns-contents-box">
+          <div id="cdn-content">
+            <div style="text-align: left;"><span class="item-theme">■検索条件</span></div>
+            <div id="cdn-line" class="cdn-class">
+              <div id ="basic-cdn">
+                <div id="additional-cdn-content-1">
+                  <div id="cdn-row-1">
+                    <!-- テーブル名.項目名 -->
+                    <div class="cdnitem-box">
+                      <select id="cdn-items-1" class="where-cdnitem" onchange="resetInputBox(1);">
+                        <option class="front-title" value="null" selected>テーブル名.項目名</option>
+                      </select>
+                    </div>
+                    <!-- 比較演算子 -->
+                    <div class="compair-box">
+                      <input id="compair-radio-1" type="radio" class="cdn-radio" name="or-checks-1" checked onchange="radioCdnChange(1)">
+                      <select id="cdn-compairs-1" class="where-compair" name="compairs" onchange="compairValChange(1)">
+                        <option value="null" selected>----</option>
+                        <!-- 画面ロード時に取得 -->
+                      </select>
+                    </div>
+                    <!-- LIKE演算子 -->
+                    <div id="cdn-likes-1" class="like-box">
+                      <input id="like-radio-1" type="radio" class="cdn-radio" name="or-checks-1" onchange="radioCdnChange(1)">
+                      <input id="forward-1" type="checkbox" name="likes-1"  value="forward" disabled onchange="likeMethodChange(this)"/><label class="like-label" for="forward-1">前方一致</label>
+                      <input id="backward-1" type="checkbox" name="likes-1" value="backward" disabled onchange="likeMethodChange(this)"/><label class="like-label" for="backward-1">後方一致</label>
+                      <input id="partof-1" type="checkbox" name="likes-1" value="partof" disabled onchange="likeMethodChange(this)"/><label class="like-label" for="partof-1">部分一致</label>
+                    </div>
+                    <!-- 値 -->
+                    <div id="val-1" class="cdnvalue-box">
+                      <input id="cdn-values-1" class="cndvalueText" placeholder="値を入力して下さい" required/> 
+                      <!--<input class="calenderBtn" type="button" id="showit" value="日付選択" onclick="displayCalenderField(1)">-->
+                    </div>
+                    <!-- 論理演算子 -->
+                    <div class="logi-box">
+                      <select id="cdn-logis-1" class="where-logi" onchange="addCdnBox(1);">
+                        <option value="null" selected>-----</option>
+                        <!-- 画面ロード時に取得 -->
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="item-theme-sub"><span>ソート条件設定</span></div>
+              <!-- テーブル名.項目名 -->
+              <div class="sortitem-box">
+                <select id="sort-item" class="where-sortitem">
+                  <option value="null" class="front-title" selected>テーブル名.項目名</option>
+                </select>
+              </div>
+              <!-- ソート順 -->
+              <div class="sort-box">
+                <select id="sort-method" class="where-sort">
+                  <option value="null" selected>----</option>
+                  <!-- 画面ロード時に取得 -->
+                </select>
+              </div>
+              <!-- 上限 -->
+              <div class="item-theme-sub"><span>取得上限</span></div>
+              <div id="where-limit">
+                <label style="width: 80px;" for="limitText">取得上限</label>
+                <input name="limit" id="limitText" type="number" placeholder="上限値" required/><span>件まで</span>
+              </div>
+              <div class="item-theme-sub"><span>取得開始位置</span></div>
+              <div id="where-offset">
+                <label style="width: 80px;" for="offsetText">開始位置</label>
+                <input name="offset" id="offsetText" type="number" placeholder="開始位置" required/><span>件目から</span>
+              </div>
+            </div>
+            <!--<div style="width: 100%;text-align: right;">
+              <button id="add-cdn-btn">条件追加</button>
+            </div>-->
+          </div>
+        </div>
+      </div>
+
+    
+
+      <div id="sql-area">
+        <div id="sql-content">
+          <div style="text-align:left;display: inline-block;"><span class="item-theme">■SQLクエリ生成</span></div>
+          <div style="float: right;margin-bottom: 5px;">
+            <button id="genarate-btn">生成</button>
+            <button id="action-btn">実行</button>
+          </div>
+          <div id="text-field">
+            <textarea id="text-box">テキストエリア</textarea>
+          </div>
+        </div>
+      </div>
+      <div id="result-area">
+        <div id="result-content">
+          <div style="text-align:left;display: inline-block;"><span class="item-theme">■SQL実行結果</span></div>
+          <div style="float: right;margin-bottom: 5px;">
+            <button class="csv-btn">CSV出力</button>
+          </div>
+          <div id="result-field">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <br style="clear: both;">
+</div>
+
+
+<!---modalウインドウ-->
+<div class="modal-container"><!-- モーダルウィンドウ本体の囲み -->
+  <div class="modal-body">
+    <button type="button" class="modal-close">close</button><!-- 閉じるボタン -->
+    <div class="modal-content"><!-- コンテンツエリア -->
+      <div id="before-box">
+        <label for="before-name" class="modal-label">変更前項目名称：</label>
+        <input type="text" id="before-name" class="modal-text">
+      </div>
+      <div id="message">
+        <p class="txt">以下の文字は、禁止されています。<br>(＄,％,＆...)←禁止文字</p>
+      </div>
+      <div id="after-box">
+        <label for="after-name" class="modal-label">変更前項目名称：</label>
+        <input type="text" id="after-name" class="modal-text">
+      </div>
+      <div id="modal-btn-area">
+        <button id="decide-btn">変更</button>
+        <button id="cancel-btn">キャンセル</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
